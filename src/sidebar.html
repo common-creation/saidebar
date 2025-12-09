@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sAIdebar</title>
+  <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+  <div class="sidebar-container">
+    <!-- Header -->
+    <div class="sidebar-header">
+      <h1 class="sidebar-title">sAIdebar</h1>
+      <div class="header-buttons">
+        <button class="header-button" id="newChatButton" title="新規チャット">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+        </button>
+        <button class="header-button" id="settingsButton" title="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Timeline -->
+    <div class="chat-timeline" id="chatTimeline">
+      <div class="empty-state" id="emptyState">
+        <p>お手伝いできることはありますか？</p>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea
+          class="chat-input"
+          id="chatInput"
+          placeholder="質問してみましょう"
+          rows="1"
+        ></textarea>
+        <button class="send-button" id="sendButton" title="Send" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+          </svg>
+        </button>
+      </div>
+      <button class="summarize-button" id="summarizeButton">
+        ページを要約
+      </button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Settings</h2>
+        <button class="modal-close" id="closeSettings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="apiProvider">API Provider</label>
+          <select class="form-input form-select" id="apiProvider">
+            <option value="anthropic">Anthropic</option>
+            <option value="zai">Z.AI GLM Coding Plan</option>
+            <option value="custom">カスタム</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="apiKey">Anthropic API Key</label>
+          <input
+            type="password"
+            class="form-input"
+            id="apiKey"
+            placeholder="sk-ant-..."
+          >
+        </div>
+        <div class="form-group" id="customUrlGroup" style="display: none;">
+          <label class="form-label" for="customApiUrl">Custom API URL</label>
+          <input
+            type="text"
+            class="form-input"
+            id="customApiUrl"
+            placeholder="https://your-api-endpoint.com"
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="modelSelect">Model</label>
+          <div class="model-select-wrapper">
+            <select class="form-input form-select" id="modelSelect" disabled>
+              <option value="">モデルを取得してください</option>
+            </select>
+            <button class="btn btn-secondary btn-fetch-models" id="fetchModelsButton" type="button">
+              取得
+            </button>
+          </div>
+          <p class="form-hint" id="modelHint">API KeyとProviderを設定後、「取得」ボタンをクリック</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="systemPrompt">System Prompt</label>
+          <textarea
+            class="form-input form-textarea"
+            id="systemPrompt"
+            placeholder="Optional: Add custom instructions for the AI..."
+            rows="4"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelSettings">Cancel</button>
+        <button class="btn btn-primary" id="saveSettings">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="sidebar.js"></script>
+</body>
+</html>
