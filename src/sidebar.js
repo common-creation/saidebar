@@ -243,9 +243,16 @@ function setupEventListeners() {
 
 // Adjust textarea height
 function adjustTextareaHeight() {
-  chatInput.style.height = "auto";
   const minHeight = 21;
   const maxHeight = 120;
+
+  // 入力が空の場合はmin-heightで固定
+  if (!chatInput.value) {
+    chatInput.style.height = minHeight + "px";
+    return;
+  }
+
+  chatInput.style.height = "auto";
   const newHeight = Math.max(minHeight, Math.min(chatInput.scrollHeight, maxHeight));
   chatInput.style.height = newHeight + "px";
 }
