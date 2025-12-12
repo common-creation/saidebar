@@ -93,9 +93,9 @@
       }
 
       .saidebar-toggle {
-        width: 24px;
-        height: 32px;
-        background: #3b82f6;
+        width: 32px;
+        height: 48px;
+        background: #3b82f6d0;
         border: none;
         border-radius: 8px 0 0 8px;
         cursor: grab;
@@ -105,6 +105,7 @@
         box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
         transition: background-color 0.2s ease;
         user-select: none;
+        backdrop-filter: blur(2px);
       }
 
       .saidebar-toggle:hover {
@@ -136,7 +137,7 @@
         pointer-events: auto;
         width: ${SIDEBAR_WIDTH}px;
         height: 100%;
-        background: #ffffff;
+        background: transparent;
         box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
         margin-left: auto;
       }

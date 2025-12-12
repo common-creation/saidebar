@@ -10,7 +10,8 @@ html, body {
   font-size: 14px;
   line-height: 1.5;
   color: #e5e7eb;
-  background: #212121;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
 }
 
 /* Layout */
@@ -27,7 +28,7 @@ html, body {
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid #3f3f3f;
-  background: #212121;
+  background: rgba(0, 0, 0, 0.6);
 }
 
 .sidebar-title {
@@ -264,14 +265,14 @@ html, body {
 .input-area {
   padding: 12px 16px 16px;
   border-top: 1px solid #3f3f3f;
-  background: #212121;
+  background: rgba(0, 0, 0, 0.6);
 }
 
 .input-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #3f3f3f;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 24px;
   padding: 8px 8px 8px 16px;
 }
