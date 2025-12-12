@@ -11,7 +11,7 @@ html, body {
   line-height: 1.5;
   color: #e5e7eb;
   background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(12px);
 }
 
 /* Layout */

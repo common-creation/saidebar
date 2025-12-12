@@ -8,7 +8,6 @@ marked.use({
 
 // DOM Elements
 const chatTimeline = document.getElementById("chatTimeline");
-const emptyState = document.getElementById("emptyState");
 const chatInput = document.getElementById("chatInput");
 const sendButton = document.getElementById("sendButton");
 const summarizeButton = document.getElementById("summarizeButton");
@@ -328,9 +327,10 @@ function renderMarkdown(content) {
 
 // Add message to UI
 function addMessageToUI(role, content, isStreaming = false) {
-  // Hide empty state
-  if (emptyState) {
-    emptyState.style.display = "none";
+  // Remove empty state (get fresh reference as it may be recreated by startNewChat)
+  const currentEmptyState = document.getElementById("emptyState");
+  if (currentEmptyState) {
+    currentEmptyState.remove();
   }
 
   const messageDiv = document.createElement("div");
