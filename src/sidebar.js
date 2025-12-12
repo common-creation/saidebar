@@ -26,6 +26,7 @@ const modelSelect = document.getElementById("modelSelect");
 const fetchModelsButton = document.getElementById("fetchModelsButton");
 const modelHint = document.getElementById("modelHint");
 const systemPromptInput = document.getElementById("systemPrompt");
+const includePageContentCheckbox = document.getElementById("includePageContent");
 
 // API Provider URL mapping
 const API_PROVIDERS = {
@@ -43,6 +44,7 @@ let settings = {
   customApiUrl: "",
   model: "",
   systemPrompt: "",
+  includePageContent: false,
 };
 
 // Cache for fetched models
@@ -156,7 +158,7 @@ async function init() {
 // Load settings from storage
 async function loadSettings() {
   try {
-    const result = await chrome.storage.local.get(["apiKey", "apiProvider", "customApiUrl", "model", "systemPrompt"]);
+    const result = await chrome.storage.local.get(["apiKey", "apiProvider", "customApiUrl", "model", "systemPrompt", "includePageContent"]);
     if (result.apiKey) {
       settings.apiKey = result.apiKey;
       apiKeyInput.value = result.apiKey;
@@ -177,6 +179,10 @@ async function loadSettings() {
       settings.systemPrompt = result.systemPrompt;
       systemPromptInput.value = result.systemPrompt;
     }
+    if (result.includePageContent !== undefined) {
+      settings.includePageContent = result.includePageContent;
+      includePageContentCheckbox.checked = result.includePageContent;
+    }
   } catch (error) {
     console.error("Failed to load settings:", error);
   }
@@ -191,9 +197,20 @@ async function saveSettingsToStorage() {
       customApiUrl: settings.customApiUrl,
       model: settings.model,
       systemPrompt: settings.systemPrompt,
+      includePageContent: settings.includePageContent,
     });
   } catch (error) {
     console.error("Failed to save settings:", error);
+  }
+}
+
+// Handle include page content checkbox change
+async function handleIncludePageContentChange() {
+  settings.includePageContent = includePageContentCheckbox.checked;
+  try {
+    await chrome.storage.local.set({ includePageContent: settings.includePageContent });
+  } catch (error) {
+    console.error("Failed to save include page content setting:", error);
   }
 }
 
@@ -232,6 +249,9 @@ function setupEventListeners() {
 
   // Fetch models button
   fetchModelsButton.addEventListener("click", fetchModels);
+
+  // Include page content checkbox
+  includePageContentCheckbox.addEventListener("change", handleIncludePageContentChange);
 
   // Close modal on overlay click
   settingsModal.addEventListener("click", (e) => {
@@ -436,6 +456,24 @@ async function sendMessage() {
   chatInput.value = "";
   adjustTextareaHeight();
   updateSendButtonState();
+
+  // Check if we should include page content
+  if (settings.includePageContent) {
+    try {
+      const pageContent = await getPageContent();
+      if (pageContent) {
+        const contentWithPage = `以下のWebページの内容を参考にして回答してください：\n\n${pageContent}\n\n---\n\nユーザーの質問: ${content}`;
+        const messagesWithContext = [
+          ...messages.slice(0, -1),
+          { role: "user", content: contentWithPage },
+        ];
+        await sendToAPIStreaming(messagesWithContext);
+        return;
+      }
+    } catch (error) {
+      console.error("Failed to get page content:", error);
+    }
+  }
 
   // Send to API
   await sendToAPIStreaming();
