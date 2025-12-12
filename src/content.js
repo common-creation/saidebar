@@ -66,6 +66,7 @@
         z-index: 2147483647;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         pointer-events: none;
+        background: transparent;
       }
 
       * {
