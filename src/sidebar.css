@@ -10,8 +10,7 @@ html, body {
   font-size: 14px;
   line-height: 1.5;
   color: #e5e7eb;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(12px);
+  background: #212121;
 }
 
 /* Layout */
@@ -28,7 +27,7 @@ html, body {
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid #3f3f3f;
-  background: rgba(0, 0, 0, 0.6);
+  background: #212121;
 }
 
 .sidebar-title {
@@ -265,7 +264,32 @@ html, body {
 .input-area {
   padding: 12px 16px 16px;
   border-top: 1px solid #3f3f3f;
-  background: rgba(0, 0, 0, 0.6);
+  background: #212121;
+}
+
+.include-page-option {
+  margin-bottom: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.checkbox-text {
+  font-size: 12px;
+  color: #9ca3af;
 }
 
 .include-page-option {
@@ -297,7 +321,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: #3f3f3f;
   border-radius: 24px;
   padding: 8px 8px 8px 16px;
 }
