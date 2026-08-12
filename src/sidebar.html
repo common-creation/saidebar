@@ -36,10 +36,14 @@
 
     <!-- Input Area -->
     <div class="input-area">
-      <div class="include-page-option">
+      <div class="input-options">
         <label class="checkbox-label">
           <input type="checkbox" id="includePageContent">
           <span class="checkbox-text">ページの内容を含める</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="webSearch">
+          <span class="checkbox-text">Web検索</span>
         </label>
       </div>
       <div class="input-wrapper">
@@ -88,6 +92,16 @@
             id="apiKey"
             placeholder="sk-ant-..."
           >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tavilyApiKey">Tavily API Key</label>
+          <input
+            type="password"
+            class="form-input"
+            id="tavilyApiKey"
+            placeholder="tvly-..."
+          >
+          <p class="form-hint">Web検索を使用する場合に必要です</p>
         </div>
         <div class="form-group" id="customUrlGroup" style="display: none;">
           <label class="form-label" for="customApiUrl">Custom API URL</label>

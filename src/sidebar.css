@@ -303,6 +303,90 @@ html, body {
   display: block;
 }
 
+/* Web search accordion */
+.websearch-accordion {
+  margin-bottom: 8px;
+}
+
+.websearch-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 2px 0;
+  color: #9ca3af;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  user-select: none;
+}
+
+.websearch-header:hover {
+  color: #e5e7eb;
+}
+
+.websearch-indicator {
+  display: flex;
+}
+
+.websearch-indicator svg {
+  width: 14px;
+  height: 14px;
+}
+
+.websearch-icon {
+  display: flex;
+}
+
+.websearch-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.websearch-body {
+  display: none;
+  margin: 4px 0 4px 16px;
+  padding-left: 10px;
+  border-left: 2px solid #525252;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #9ca3af;
+  word-wrap: break-word;
+}
+
+.websearch-accordion.expanded .websearch-body {
+  display: block;
+}
+
+.websearch-query {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #e5e7eb;
+}
+
+.websearch-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.websearch-result-title {
+  display: block;
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.websearch-result-title:hover {
+  text-decoration: underline;
+}
+
+.websearch-result-content {
+  margin-top: 2px;
+}
+
 /* Loading indicator */
 .typing-indicator {
   display: flex;
@@ -333,32 +417,10 @@ html, body {
   background: #212121;
 }
 
-.include-page-option {
-  margin-bottom: 8px;
-}
-
-.checkbox-label {
+.input-options {
   display: flex;
   align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
-  margin: 0;
-  cursor: pointer;
-  accent-color: #3b82f6;
-}
-
-.checkbox-text {
-  font-size: 12px;
-  color: #9ca3af;
-}
-
-.include-page-option {
+  gap: 16px;
   margin-bottom: 8px;
 }
 
