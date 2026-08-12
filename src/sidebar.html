@@ -13,15 +13,10 @@
       <h1 class="sidebar-title">sAIdebar</h1>
       <div class="header-buttons">
         <button class="header-button" id="newChatButton" title="新規チャット">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>
+          <i data-lucide="plus"></i>
         </button>
         <button class="header-button" id="settingsButton" title="Settings">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
+          <i data-lucide="settings"></i>
         </button>
       </div>
     </div>
@@ -49,9 +44,7 @@
           rows="1"
         ></textarea>
         <button class="send-button" id="sendButton" title="Send" disabled>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-          </svg>
+          <i data-lucide="send"></i>
         </button>
       </div>
       <button class="summarize-button" id="summarizeButton">
@@ -75,14 +68,17 @@
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label" for="apiProvider">API Provider</label>
-          <select class="form-input form-select" id="apiProvider">
-            <option value="anthropic">Anthropic</option>
-            <option value="zai">Z.AI GLM Coding Plan</option>
-            <option value="custom">カスタム</option>
-          </select>
+          <div class="select-wrapper">
+            <select class="form-input form-select" id="apiProvider">
+              <option value="anthropic">Anthropic</option>
+              <option value="opencode-go">OpenCode Go</option>
+              <option value="custom">カスタム</option>
+            </select>
+            <i data-lucide="chevron-down"></i>
+          </div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="apiKey">Anthropic API Key</label>
+          <label class="form-label" for="apiKey">API Key</label>
           <input
             type="password"
             class="form-input"
@@ -102,9 +98,12 @@
         <div class="form-group">
           <label class="form-label" for="modelSelect">Model</label>
           <div class="model-select-wrapper">
-            <select class="form-input form-select" id="modelSelect" disabled>
-              <option value="">モデルを取得してください</option>
-            </select>
+            <div class="select-wrapper">
+              <select class="form-input form-select" id="modelSelect" disabled>
+                <option value="">モデルを取得してください</option>
+              </select>
+              <i data-lucide="chevron-down"></i>
+            </div>
             <button class="btn btn-secondary btn-fetch-models" id="fetchModelsButton" type="button">
               取得
             </button>

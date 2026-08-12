@@ -1,9 +1,21 @@
 import { marked } from "marked";
+import OpenAI from "openai";
+import { createElement, createIcons, Brain, ChevronDown, ChevronRight, Plus, Send, Settings } from "lucide";
 
 // Configure marked options
 marked.use({
   gfm: true,
   breaks: true,
+});
+
+// Replace Lucide icons
+createIcons({
+  icons: {
+    ChevronDown,
+    Plus,
+    Send,
+    Settings,
+  },
 });
 
 // DOM Elements
@@ -30,9 +42,13 @@ const includePageContentCheckbox = document.getElementById("includePageContent")
 // API Provider URL mapping
 const API_PROVIDERS = {
   anthropic: "https://api.anthropic.com",
-  zai: "https://api.z.ai/api/anthropic",
+  "opencode-go": "https://opencode.ai/zen/go/v1",
   custom: null,
 };
+
+function isOpenAIProvider(provider) {
+  return provider === "opencode-go";
+}
 
 // State
 let messages = [];
@@ -85,6 +101,7 @@ async function fetchModels() {
   }
 
   const baseUrl = getFormApiBaseUrl();
+  const isOpenAI = isOpenAIProvider(apiProviderSelect.value);
 
   // Update UI state
   fetchModelsButton.disabled = true;
@@ -93,13 +110,17 @@ async function fetchModels() {
   modelHint.className = "form-hint";
 
   try {
-    const response = await fetch(`${baseUrl}/v1/models`, {
+    const response = await fetch(`${baseUrl}${isOpenAI ? "/models" : "/v1/models"}`, {
       method: "GET",
-      headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
+      headers: isOpenAI
+        ? {
+            Authorization: `Bearer ${apiKey}`,
+          }
+        : {
+            "x-api-key": apiKey,
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-direct-browser-access": "true",
+          },
     });
 
     if (!response.ok) {
@@ -325,13 +346,17 @@ function renderMarkdown(content) {
   return marked.parse(content);
 }
 
-// Add message to UI
-function addMessageToUI(role, content, isStreaming = false) {
-  // Remove empty state (get fresh reference as it may be recreated by startNewChat)
+// Remove empty state (get fresh reference as it may be recreated by startNewChat)
+function removeEmptyState() {
   const currentEmptyState = document.getElementById("emptyState");
   if (currentEmptyState) {
     currentEmptyState.remove();
   }
+}
+
+// Add message to UI
+function addMessageToUI(role, content, isStreaming = false) {
+  removeEmptyState();
 
   const messageDiv = document.createElement("div");
   messageDiv.className = `message message-${role}`;
@@ -372,6 +397,65 @@ function finalizeStreamingMessage() {
   const streamingMessage = document.getElementById("streamingMessage");
   if (streamingMessage) {
     streamingMessage.removeAttribute("id");
+  }
+}
+
+// Set thinking accordion indicator icon
+function setThinkingIndicator(indicator, expanded) {
+  indicator.replaceChildren(createElement(expanded ? ChevronDown : ChevronRight));
+}
+
+// Create thinking (CoT) accordion
+function createThinkingAccordion() {
+  removeEmptyState();
+
+  const accordion = document.createElement("div");
+  accordion.className = "thinking-accordion expanded";
+  accordion.id = "thinkingAccordion";
+
+  const header = document.createElement("button");
+  header.className = "thinking-header";
+  header.type = "button";
+
+  const indicator = document.createElement("span");
+  indicator.className = "thinking-indicator";
+  setThinkingIndicator(indicator, true);
+
+  const brainIcon = document.createElement("span");
+  brainIcon.className = "thinking-icon";
+  brainIcon.appendChild(createElement(Brain));
+
+  const label = document.createElement("span");
+  label.className = "thinking-label";
+  label.textContent = "Thinking...";
+
+  header.appendChild(indicator);
+  header.appendChild(brainIcon);
+  header.appendChild(label);
+
+  const body = document.createElement("div");
+  body.className = "thinking-body";
+
+  accordion.appendChild(header);
+  accordion.appendChild(body);
+
+  header.addEventListener("click", () => {
+    const expanded = accordion.classList.toggle("expanded");
+    setThinkingIndicator(indicator, expanded);
+  });
+
+  chatTimeline.appendChild(accordion);
+  scrollToBottom();
+
+  return accordion;
+}
+
+// Collapse thinking accordion
+function collapseThinkingAccordion(accordion) {
+  accordion.classList.remove("expanded");
+  const indicator = accordion.querySelector(".thinking-indicator");
+  if (indicator) {
+    setThinkingIndicator(indicator, false);
   }
 }
 
@@ -539,16 +623,24 @@ async function getPageContent() {
   });
 }
 
-// Send to Anthropic API with streaming
+// Send to API with streaming
 async function sendToAPIStreaming(customMessages = null) {
+  const messagesToSend = customMessages || messages;
+  if (isOpenAIProvider(settings.apiProvider)) {
+    await sendToOpenAIStreaming(messagesToSend);
+  } else {
+    await sendToAnthropicStreaming(messagesToSend);
+  }
+}
+
+// Send to Anthropic API with streaming
+async function sendToAnthropicStreaming(messagesToSend) {
   isLoading = true;
   updateSendButtonState();
   summarizeButton.disabled = true;
   addLoadingIndicator();
 
   try {
-    const messagesToSend = customMessages || messages;
-
     const requestBody = {
       model: settings.model || "claude-sonnet-4-20250514",
       max_tokens: 4096,
@@ -630,6 +722,90 @@ async function sendToAPIStreaming(customMessages = null) {
         }
       }
     }
+
+    // Add assistant message to history
+    if (fullContent) {
+      messages.push({ role: "assistant", content: fullContent });
+    }
+  } catch (error) {
+    removeLoadingIndicator();
+    // Remove streaming message if it exists
+    const streamingMessage = document.getElementById("streamingMessage");
+    if (streamingMessage) {
+      streamingMessage.remove();
+    }
+    showError(`エラー: ${error.message}`);
+  } finally {
+    isLoading = false;
+    updateSendButtonState();
+    summarizeButton.disabled = false;
+  }
+}
+
+// Send to OpenAI-compatible API with streaming
+async function sendToOpenAIStreaming(messagesToSend) {
+  isLoading = true;
+  updateSendButtonState();
+  summarizeButton.disabled = true;
+  addLoadingIndicator();
+
+  try {
+    const client = new OpenAI({
+      apiKey: settings.apiKey,
+      baseURL: API_PROVIDERS["opencode-go"],
+      dangerouslyAllowBrowser: true,
+    });
+
+    const apiMessages = [];
+    if (settings.systemPrompt) {
+      apiMessages.push({ role: "system", content: settings.systemPrompt });
+    }
+    apiMessages.push(...messagesToSend);
+
+    const stream = await client.chat.completions.create({
+      model: settings.model || "minimax-m3",
+      max_tokens: 4096,
+      stream: true,
+      messages: apiMessages,
+    });
+
+    // Remove loading indicator and start streaming
+    removeLoadingIndicator();
+
+    let fullContent = "";
+    let reasoningContent = "";
+    let thinkingAccordion = null;
+
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta || {};
+
+      if (typeof delta.reasoning_content === "string" && delta.content === null) {
+        if (!thinkingAccordion) {
+          thinkingAccordion = createThinkingAccordion();
+        }
+        reasoningContent += delta.reasoning_content;
+        thinkingAccordion.querySelector(".thinking-body").textContent = reasoningContent;
+        scrollToBottom();
+      } else if (typeof delta.content === "string" && delta.reasoning_content === null) {
+        if (!document.getElementById("streamingMessage")) {
+          addMessageToUI("assistant", "", true);
+        }
+        if (thinkingAccordion) {
+          const label = thinkingAccordion.querySelector(".thinking-label");
+          if (label && label.textContent === "Thinking...") {
+            label.textContent = "Thinking";
+          }
+          if (thinkingAccordion.classList.contains("expanded")) {
+            collapseThinkingAccordion(thinkingAccordion);
+          }
+        }
+        fullContent += delta.content;
+        updateStreamingMessage(fullContent);
+      }
+    }
+
+    // Stream complete
+    finalizeStreamingMessage();
 
     // Add assistant message to history
     if (fullContent) {

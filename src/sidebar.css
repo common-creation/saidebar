@@ -61,6 +61,11 @@ html, body {
   color: #ffffff;
 }
 
+.header-button .lucide {
+  width: 20px;
+  height: 20px;
+}
+
 /* Chat Timeline */
 .chat-timeline {
   flex: 1;
@@ -237,6 +242,63 @@ html, body {
   font-style: italic;
 }
 
+/* Thinking accordion */
+.thinking-accordion {
+  margin-bottom: 8px;
+}
+
+.thinking-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 2px 0;
+  color: #9ca3af;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  user-select: none;
+}
+
+.thinking-header:hover {
+  color: #e5e7eb;
+}
+
+.thinking-indicator {
+  display: flex;
+}
+
+.thinking-indicator svg {
+  width: 14px;
+  height: 14px;
+}
+
+.thinking-icon {
+  display: flex;
+}
+
+.thinking-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.thinking-body {
+  display: none;
+  margin: 4px 0 4px 16px;
+  padding-left: 10px;
+  border-left: 2px solid #525252;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #9ca3af;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.thinking-accordion.expanded .thinking-body {
+  display: block;
+}
+
 /* Loading indicator */
 .typing-indicator {
   display: flex;
@@ -361,6 +423,11 @@ html, body {
 
 .send-button:hover:not(:disabled) {
   background: #2563eb;
+}
+
+.send-button .lucide {
+  width: 20px;
+  height: 20px;
 }
 
 .send-button:disabled {
@@ -503,11 +570,23 @@ html, body {
 
 .form-select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
   padding-right: 36px;
   cursor: pointer;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper .lucide-chevron-down {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: #9ca3af;
+  pointer-events: none;
 }
 
 .form-select:hover {
@@ -526,7 +605,7 @@ html, body {
   gap: 8px;
 }
 
-.model-select-wrapper .form-select {
+.model-select-wrapper .select-wrapper {
   flex: 1;
 }
 
