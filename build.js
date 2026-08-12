@@ -12,7 +12,7 @@ if (!existsSync("dist")) {
 cpSync("manifest.json", "dist/manifest.json");
 
 // Copy static files from src
-const srcFiles = ["sidebar.html", "sidebar.css", "content.js"];
+const srcFiles = ["sidebar.html", "sidebar.css"];
 srcFiles.forEach((file) => {
   cpSync(`src/${file}`, `dist/${file}`);
 });
@@ -20,11 +20,11 @@ srcFiles.forEach((file) => {
 // Copy icons directory
 cpSync("icons", "dist/icons", { recursive: true });
 
-// Build sidebar.js with dependencies
+// Build sidebar.js and content.js with dependencies
 const buildOptions = {
-  entryPoints: ["src/sidebar.js"],
+  entryPoints: ["src/sidebar.js", "src/content.js"],
   bundle: true,
-  outfile: "dist/sidebar.js",
+  outdir: "dist",
   format: "iife",
   target: ["chrome100"],
   minify: !isWatch,

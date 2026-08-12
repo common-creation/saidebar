@@ -1,3 +1,5 @@
+import { createIcons, ChevronLeft } from "lucide";
+
 (function () {
   const SIDEBAR_WIDTH = 400;
   const SIDEBAR_ID = "saidebar-root";
@@ -124,7 +126,7 @@
       .saidebar-toggle-icon {
         width: 16px;
         height: 16px;
-        fill: white;
+        color: white;
         transition: transform 0.3s ease;
         pointer-events: none;
       }
@@ -169,11 +171,17 @@
     toggleButton.className = "saidebar-toggle";
     toggleButton.title = "Toggle Sidebar (drag to move)";
     toggleButton.innerHTML = `
-      <svg class="saidebar-toggle-icon${isOpen ? " open" : ""}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-      </svg>
+      <i class="saidebar-toggle-icon${isOpen ? " open" : ""}" data-lucide="chevron-left"></i>
     `;
     toggleWrapper.appendChild(toggleButton);
+
+    // Replace Lucide icons inside the shadow DOM
+    createIcons({
+      icons: {
+        ChevronLeft,
+      },
+      root: shadow,
+    });
 
     // Create sidebar panel
     const panel = document.createElement("div");
