@@ -8,6 +8,7 @@ import { createIcons, ChevronLeft } from "lucide";
 
   // State (preserved across re-injections)
   let isOpen = false;
+  let isClosed = false;
   let togglePositionY = 50; // percentage from top (default: center)
   let root = null;
   let shadow = null;
@@ -320,8 +321,25 @@ import { createIcons, ChevronLeft } from "lucide";
           "*"
         );
       }
+    } else if (event.data && event.data.type === "CLOSE_SIDEBAR") {
+      closeSidebar();
     }
   });
+
+  // Completely close the sidebar (no persistence; reload restores it)
+  function closeSidebar() {
+    isClosed = true;
+    isOpen = false;
+    const existingRoot = document.getElementById(SIDEBAR_ID);
+    if (existingRoot) {
+      existingRoot.remove();
+    }
+    root = null;
+    shadow = null;
+    container = null;
+    toggleButton = null;
+    iframe = null;
+  }
 
   // Get page content
   function getPageContent() {
@@ -371,6 +389,7 @@ import { createIcons, ChevronLeft } from "lucide";
 
   // Check and re-inject sidebar if removed
   function ensureSidebar() {
+    if (isClosed) return;
     if (!document.getElementById(SIDEBAR_ID) && document.body) {
       createSidebar();
     }

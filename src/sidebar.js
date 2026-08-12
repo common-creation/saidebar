@@ -1,6 +1,6 @@
 import { marked } from "marked";
 import OpenAI from "openai";
-import { createElement, createIcons, Brain, ChevronDown, ChevronRight, Plus, Send, Settings } from "lucide";
+import { createElement, createIcons, Brain, ChevronDown, ChevronRight, Plus, Send, Settings, X } from "lucide";
 
 // Configure marked options
 marked.use({
@@ -15,6 +15,7 @@ createIcons({
     Plus,
     Send,
     Settings,
+    X,
   },
 });
 
@@ -25,6 +26,7 @@ const sendButton = document.getElementById("sendButton");
 const summarizeButton = document.getElementById("summarizeButton");
 const newChatButton = document.getElementById("newChatButton");
 const settingsButton = document.getElementById("settingsButton");
+const closeSidebarButton = document.getElementById("closeSidebarButton");
 const settingsModal = document.getElementById("settingsModal");
 const closeSettings = document.getElementById("closeSettings");
 const cancelSettings = document.getElementById("cancelSettings");
@@ -263,6 +265,11 @@ function setupEventListeners() {
   closeSettings.addEventListener("click", closeSettingsModal);
   cancelSettings.addEventListener("click", closeSettingsModal);
   saveSettings.addEventListener("click", handleSaveSettings);
+
+  // Close sidebar completely
+  closeSidebarButton.addEventListener("click", () => {
+    window.parent.postMessage({ type: "CLOSE_SIDEBAR" }, "*");
+  });
 
   // API provider dropdown
   apiProviderSelect.addEventListener("change", updateCustomUrlVisibility);
