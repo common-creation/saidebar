@@ -359,6 +359,7 @@ function removeEmptyState() {
   if (currentEmptyState) {
     currentEmptyState.remove();
   }
+  summarizeButton.style.display = "none";
 }
 
 // Add message to UI
@@ -522,6 +523,10 @@ function startNewChat() {
   emptyStateDiv.id = "emptyState";
   emptyStateDiv.innerHTML = "<p>お手伝いできることはありますか？</p>";
   chatTimeline.appendChild(emptyStateDiv);
+
+  // Show summarize button at the bottom of the timeline
+  chatTimeline.appendChild(summarizeButton);
+  summarizeButton.style.display = "block";
 
   // Clear input
   chatInput.value = "";
