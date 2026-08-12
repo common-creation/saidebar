@@ -220,6 +220,8 @@ html, body {
 }
 
 .message-content table {
+  display: block;
+  overflow-x: auto;
   border-collapse: collapse;
   width: 100%;
   margin: 8px 0;
