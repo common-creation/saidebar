@@ -46,12 +46,13 @@ const webSearchCheckbox = document.getElementById("webSearch");
 // API Provider URL mapping
 const API_PROVIDERS = {
   anthropic: "https://api.anthropic.com",
+  openai: "https://api.openai.com/v1",
   "opencode-go": "https://opencode.ai/zen/go/v1",
   custom: null,
 };
 
 function isOpenAIProvider(provider) {
-  return provider === "opencode-go";
+  return provider === "openai" || provider === "opencode-go";
 }
 
 // State
@@ -1088,7 +1089,7 @@ async function sendToOpenAIStreaming(messagesToSend) {
   try {
     const client = new OpenAI({
       apiKey: settings.apiKey,
-      baseURL: API_PROVIDERS["opencode-go"],
+      baseURL: getApiBaseUrl(),
       dangerouslyAllowBrowser: true,
     });
 
