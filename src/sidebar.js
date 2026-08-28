@@ -1129,7 +1129,7 @@ async function sendToOpenAIStreaming(messagesToSend) {
       for await (const chunk of stream) {
         const delta = chunk.choices[0]?.delta || {};
 
-        if (typeof delta.reasoning_content === "string" && delta.content === null) {
+        if (typeof delta.reasoning_content === "string" && delta.content == null) {
           if (!thinkingAccordion) {
             thinkingAccordion = createThinkingAccordion();
           }
@@ -1168,7 +1168,7 @@ async function sendToOpenAIStreaming(messagesToSend) {
             displayContent = "";
             fullContent = "";
           }
-        } else if (typeof delta.content === "string" && delta.content && delta.reasoning_content === null) {
+        } else if (typeof delta.content === "string" && delta.content && delta.reasoning_content == null) {
           if (!document.getElementById("streamingMessage")) {
             addMessageToUI("assistant", "", true);
             displayContent = "";
