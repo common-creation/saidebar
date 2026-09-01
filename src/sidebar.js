@@ -35,6 +35,8 @@ const apiKeyInput = document.getElementById("apiKey");
 const apiProviderSelect = document.getElementById("apiProvider");
 const customUrlGroup = document.getElementById("customUrlGroup");
 const customApiUrlInput = document.getElementById("customApiUrl");
+const zdrGroup = document.getElementById("zdrGroup");
+const zdrEnabledCheckbox = document.getElementById("zdrEnabled");
 const tavilyApiKeyInput = document.getElementById("tavilyApiKey");
 const modelSelect = document.getElementById("modelSelect");
 const fetchModelsButton = document.getElementById("fetchModelsButton");
@@ -48,11 +50,16 @@ const API_PROVIDERS = {
   anthropic: "https://api.anthropic.com",
   openai: "https://api.openai.com/v1",
   "opencode-go": "https://opencode.ai/zen/go/v1",
+  "command-code": "https://api.commandcode.ai/provider/v1",
   custom: null,
 };
 
 function isOpenAIProvider(provider) {
-  return provider === "openai" || provider === "opencode-go";
+  return provider === "openai" || provider === "opencode-go" || provider === "command-code";
+}
+
+function isCommandCodeProvider(provider) {
+  return provider === "command-code";
 }
 
 // State
@@ -67,6 +74,7 @@ let settings = {
   systemPrompt: "",
   includePageContent: false,
   webSearch: false,
+  zdrEnabled: false,
 };
 
 // Tavily search tool definitions
@@ -122,6 +130,15 @@ function updateCustomUrlVisibility() {
     customUrlGroup.style.display = "block";
   } else {
     customUrlGroup.style.display = "none";
+  }
+}
+
+// Update ZDR checkbox visibility (Command Code only)
+function updateZdrVisibility() {
+  if (isCommandCodeProvider(apiProviderSelect.value)) {
+    zdrGroup.style.display = "block";
+  } else {
+    zdrGroup.style.display = "none";
   }
 }
 
@@ -221,7 +238,7 @@ async function init() {
 // Load settings from storage
 async function loadSettings() {
   try {
-    const result = await chrome.storage.local.get(["apiKey", "apiProvider", "customApiUrl", "tavilyApiKey", "model", "systemPrompt", "includePageContent", "webSearch"]);
+    const result = await chrome.storage.local.get(["apiKey", "apiProvider", "customApiUrl", "tavilyApiKey", "model", "systemPrompt", "includePageContent", "webSearch", "zdrEnabled"]);
     if (result.apiKey) {
       settings.apiKey = result.apiKey;
       apiKeyInput.value = result.apiKey;
@@ -230,6 +247,7 @@ async function loadSettings() {
       settings.apiProvider = result.apiProvider;
       apiProviderSelect.value = result.apiProvider;
       updateCustomUrlVisibility();
+      updateZdrVisibility();
     }
     if (result.customApiUrl) {
       settings.customApiUrl = result.customApiUrl;
@@ -254,6 +272,10 @@ async function loadSettings() {
       settings.webSearch = result.webSearch;
       webSearchCheckbox.checked = result.webSearch;
     }
+    if (result.zdrEnabled !== undefined) {
+      settings.zdrEnabled = result.zdrEnabled;
+      zdrEnabledCheckbox.checked = result.zdrEnabled;
+    }
   } catch (error) {
     console.error("Failed to load settings:", error);
   }
@@ -271,6 +293,7 @@ async function saveSettingsToStorage() {
       systemPrompt: settings.systemPrompt,
       includePageContent: settings.includePageContent,
       webSearch: settings.webSearch,
+      zdrEnabled: settings.zdrEnabled,
     });
   } catch (error) {
     console.error("Failed to save settings:", error);
@@ -333,7 +356,10 @@ function setupEventListeners() {
   });
 
   // API provider dropdown
-  apiProviderSelect.addEventListener("change", updateCustomUrlVisibility);
+  apiProviderSelect.addEventListener("change", () => {
+    updateCustomUrlVisibility();
+    updateZdrVisibility();
+  });
 
   // Fetch models button
   fetchModelsButton.addEventListener("click", fetchModels);
@@ -380,7 +406,9 @@ function openSettings() {
   customApiUrlInput.value = settings.customApiUrl;
   tavilyApiKeyInput.value = settings.tavilyApiKey;
   systemPromptInput.value = settings.systemPrompt;
+  zdrEnabledCheckbox.checked = settings.zdrEnabled;
   updateCustomUrlVisibility();
+  updateZdrVisibility();
 
   // Reset model select if no cached models
   if (cachedModels.length === 0 && settings.model) {
@@ -410,6 +438,7 @@ function handleSaveSettings() {
   settings.tavilyApiKey = tavilyApiKeyInput.value.trim();
   settings.model = modelSelect.value || settings.model;
   settings.systemPrompt = systemPromptInput.value.trim();
+  settings.zdrEnabled = zdrEnabledCheckbox.checked;
   saveSettingsToStorage();
   closeSettingsModal();
 }
@@ -1116,7 +1145,12 @@ async function sendToOpenAIStreaming(messagesToSend) {
         params.tools = [TAVILY_SEARCH_TOOL_OPENAI];
       }
 
-      const stream = await client.chat.completions.create(params);
+      const requestOptions =
+        isCommandCodeProvider(settings.apiProvider) && settings.zdrEnabled
+          ? { headers: { "x-cmd-zdr": "1" } }
+          : undefined;
+
+      const stream = await client.chat.completions.create(params, requestOptions);
 
       // Remove loading indicator and start streaming
       removeLoadingIndicator();
@@ -1137,6 +1171,31 @@ async function sendToOpenAIStreaming(messagesToSend) {
           reasoningContent += delta.reasoning_content;
           thinkingAccordion.querySelector(".thinking-body").textContent = reasoningContent;
           scrollToBottom();
+        } else if (
+          typeof delta.reasoning === "string" ||
+          Array.isArray(delta.reasoning_details)
+        ) {
+          // Command Code format: delta.reasoning (accumulated text) and/or
+          // delta.reasoning_details (array of reasoning.text entries)
+          let reasoningPart = "";
+          if (Array.isArray(delta.reasoning_details)) {
+            for (const detail of delta.reasoning_details) {
+              if (detail && detail.type === "reasoning.text" && typeof detail.text === "string") {
+                reasoningPart += detail.text;
+              }
+            }
+          }
+          if (!reasoningPart && typeof delta.reasoning === "string") {
+            reasoningPart = delta.reasoning;
+          }
+          if (reasoningPart) {
+            if (!thinkingAccordion) {
+              thinkingAccordion = createThinkingAccordion();
+            }
+            reasoningContent += reasoningPart;
+            thinkingAccordion.querySelector(".thinking-body").textContent = reasoningContent;
+            scrollToBottom();
+          }
         } else if (Array.isArray(delta.tool_calls)) {
           for (const toolCall of delta.tool_calls) {
             const index = toolCall.index ?? 0;
@@ -1215,6 +1274,9 @@ async function sendToOpenAIStreaming(messagesToSend) {
       };
       if (reasoningContent) {
         assistantToolCallMessage.reasoning_content = reasoningContent;
+        if (isCommandCodeProvider(settings.apiProvider)) {
+          assistantToolCallMessage.reasoning = reasoningContent;
+        }
       }
       apiMessages.push(assistantToolCallMessage);
 

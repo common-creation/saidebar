@@ -80,6 +80,7 @@
               <option value="anthropic">Anthropic</option>
               <option value="openai">OpenAI</option>
               <option value="opencode-go">OpenCode Go</option>
+              <option value="command-code">Command Code</option>
               <option value="custom">カスタム</option>
             </select>
             <i data-lucide="chevron-down"></i>
@@ -102,6 +103,13 @@
             id="customApiUrl"
             placeholder="https://your-api-endpoint.com"
           >
+        </div>
+        <div class="form-group" id="zdrGroup" style="display: none;">
+          <label class="checkbox-label" for="zdrEnabled">
+            <input type="checkbox" id="zdrEnabled">
+            <span class="checkbox-text">ZDR（データ保持を無効化）</span>
+          </label>
+          <p class="form-hint">リクエスト毎に "x-cmd-zdr: 1" ヘッダを送信します</p>
         </div>
         <div class="form-group">
           <label class="form-label" for="modelSelect">Model</label>
