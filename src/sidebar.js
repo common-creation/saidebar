@@ -1,5 +1,6 @@
 import { marked } from "marked";
 import OpenAI from "openai";
+import { proxyFetch } from "./proxy-fetch.js";
 import { createElement, createIcons, Brain, ChevronDown, ChevronRight, Plus, Search, Send, Settings, X } from "lucide";
 
 // Configure marked options
@@ -170,7 +171,7 @@ async function fetchModels() {
   modelHint.className = "form-hint";
 
   try {
-    const response = await fetch(`${baseUrl}${isOpenAI ? "/models" : "/v1/models"}`, {
+    const response = await proxyFetch(`${baseUrl}${isOpenAI ? "/models" : "/v1/models"}`, {
       method: "GET",
       headers: isOpenAI
         ? {
@@ -675,7 +676,7 @@ function renderWebSearchResults(accordion, query, response) {
 
 // Search the web using Tavily
 async function tavilySearch(query, maxResults = 5) {
-  const response = await fetch("https://api.tavily.com/search", {
+  const response = await proxyFetch("https://api.tavily.com/search", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -934,7 +935,7 @@ async function sendToAnthropicStreaming(messagesToSend) {
         requestBody.tools = [TAVILY_SEARCH_TOOL_ANTHROPIC];
       }
 
-      const response = await fetch(`${getApiBaseUrl()}/v1/messages`, {
+      const response = await proxyFetch(`${getApiBaseUrl()}/v1/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1120,6 +1121,7 @@ async function sendToOpenAIStreaming(messagesToSend) {
       apiKey: settings.apiKey,
       baseURL: getApiBaseUrl(),
       dangerouslyAllowBrowser: true,
+      fetch: proxyFetch,
     });
 
     const apiMessages = [];
