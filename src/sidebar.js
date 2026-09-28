@@ -1178,20 +1178,15 @@ async function sendToOpenAIStreaming(messagesToSend) {
       for await (const chunk of stream) {
         const delta = chunk.choices[0]?.delta || {};
 
-        if (typeof delta.reasoning_content === "string" && delta.content == null) {
-          if (!thinkingAccordion) {
-            thinkingAccordion = createThinkingAccordion();
-          }
-          reasoningContent += delta.reasoning_content;
-          thinkingAccordion.querySelector(".thinking-body").textContent = reasoningContent;
-          scrollToBottom();
-        } else if (
-          typeof delta.reasoning === "string" ||
-          Array.isArray(delta.reasoning_details)
-        ) {
+        // Reasoning, tool calls and content are handled independently because some
+        // providers send both content and reasoning_content (e.g. content: "") in every chunk
+        let reasoningPart = "";
+        if (typeof delta.reasoning_content === "string") {
+          reasoningPart = delta.reasoning_content;
+        }
+        if (!reasoningPart) {
           // Command Code format: delta.reasoning (accumulated text) and/or
           // delta.reasoning_details (array of reasoning.text entries)
-          let reasoningPart = "";
           if (Array.isArray(delta.reasoning_details)) {
             for (const detail of delta.reasoning_details) {
               if (detail && detail.type === "reasoning.text" && typeof detail.text === "string") {
@@ -1202,15 +1197,17 @@ async function sendToOpenAIStreaming(messagesToSend) {
           if (!reasoningPart && typeof delta.reasoning === "string") {
             reasoningPart = delta.reasoning;
           }
-          if (reasoningPart) {
-            if (!thinkingAccordion) {
-              thinkingAccordion = createThinkingAccordion();
-            }
-            reasoningContent += reasoningPart;
-            thinkingAccordion.querySelector(".thinking-body").textContent = reasoningContent;
-            scrollToBottom();
+        }
+        if (reasoningPart) {
+          if (!thinkingAccordion) {
+            thinkingAccordion = createThinkingAccordion();
           }
-        } else if (Array.isArray(delta.tool_calls)) {
+          reasoningContent += reasoningPart;
+          thinkingAccordion.querySelector(".thinking-body").textContent = reasoningContent;
+          scrollToBottom();
+        }
+
+        if (Array.isArray(delta.tool_calls)) {
           for (const toolCall of delta.tool_calls) {
             const index = toolCall.index ?? 0;
             if (!toolCalls[index]) {
@@ -1242,7 +1239,9 @@ async function sendToOpenAIStreaming(messagesToSend) {
             displayContent = "";
             fullContent = "";
           }
-        } else if (typeof delta.content === "string" && delta.content && delta.reasoning_content == null) {
+        }
+
+        if (typeof delta.content === "string" && delta.content) {
           if (!document.getElementById("streamingMessage")) {
             addMessageToUI("assistant", "", true);
             displayContent = "";
