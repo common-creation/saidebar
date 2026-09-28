@@ -63,8 +63,14 @@ function isCommandCodeProvider(provider) {
   return provider === "command-code";
 }
 
+function isOpenCodeGoProvider(provider) {
+  return provider === "opencode-go";
+}
+
 // State
 let messages = [];
+// Stable per-conversation session ID (sent as x-opencode-session for OpenCode Go)
+let sessionId = crypto.randomUUID();
 let isLoading = false;
 let settings = {
   apiKey: "",
@@ -763,8 +769,9 @@ function scrollToBottom() {
 
 // Start new chat
 function startNewChat() {
-  // Clear messages array
+  // Clear messages array and start a new session
   messages = [];
+  sessionId = crypto.randomUUID();
 
   // Clear chat timeline UI
   chatTimeline.innerHTML = "";
@@ -1147,10 +1154,15 @@ async function sendToOpenAIStreaming(messagesToSend) {
         params.tools = [TAVILY_SEARCH_TOOL_OPENAI];
       }
 
+      const requestHeaders = {};
+      if (isCommandCodeProvider(settings.apiProvider) && settings.zdrEnabled) {
+        requestHeaders["x-cmd-zdr"] = "1";
+      }
+      if (isOpenCodeGoProvider(settings.apiProvider)) {
+        requestHeaders["x-opencode-session"] = sessionId;
+      }
       const requestOptions =
-        isCommandCodeProvider(settings.apiProvider) && settings.zdrEnabled
-          ? { headers: { "x-cmd-zdr": "1" } }
-          : undefined;
+        Object.keys(requestHeaders).length > 0 ? { headers: requestHeaders } : undefined;
 
       const stream = await client.chat.completions.create(params, requestOptions);
 
