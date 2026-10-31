@@ -214,7 +214,12 @@ async function fetchModels() {
     }
 
     const data = await response.json();
-    cachedModels = data.data || [];
+    cachedModels = [...(data.data || [])].sort((a, b) =>
+      (a.display_name || a.id).localeCompare(b.display_name || b.id, "en", {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
 
     // Update model select dropdown
     modelSelect.innerHTML = "";
