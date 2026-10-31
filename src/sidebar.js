@@ -951,6 +951,7 @@ async function sendToAnthropicStreaming(messagesToSend) {
     while (true) {
       const requestBody = {
         model: settings.model || "claude-sonnet-4-20250514",
+        // Required by the Anthropic Messages API.
         max_tokens: 4096,
         stream: true,
         messages: messagesForRequest,
@@ -1166,9 +1167,9 @@ async function sendToOpenAIStreaming(messagesToSend) {
     let forceFinalAnswer = false;
 
     while (true) {
+      // Omit optional generation parameters for compatibility across models.
       const params = {
         model: settings.model || "minimax-m3",
-        max_tokens: 4096,
         stream: true,
         messages: apiMessages,
       };
