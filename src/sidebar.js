@@ -52,11 +52,32 @@ const API_PROVIDERS = {
   openai: "https://api.openai.com/v1",
   "opencode-go": "https://opencode.ai/zen/go/v1",
   "command-code": "https://api.commandcode.ai/provider/v1",
-  custom: null,
+  "custom-anthropic": null,
+  "custom-openai": null,
 };
 
 function isOpenAIProvider(provider) {
-  return provider === "openai" || provider === "opencode-go" || provider === "command-code";
+  return (
+    provider === "openai" ||
+    provider === "opencode-go" ||
+    provider === "command-code" ||
+    provider === "custom-openai"
+  );
+}
+
+function isCustomProvider(provider) {
+  return provider === "custom-anthropic" || provider === "custom-openai";
+}
+
+// Resolve API base URL for a provider (custom providers fall back to their format's default)
+function resolveApiBaseUrl(provider, customApiUrl) {
+  if (isCustomProvider(provider)) {
+    if (customApiUrl) {
+      return customApiUrl;
+    }
+    return provider === "custom-openai" ? API_PROVIDERS.openai : API_PROVIDERS.anthropic;
+  }
+  return API_PROVIDERS[provider] || API_PROVIDERS.anthropic;
 }
 
 function isCommandCodeProvider(provider) {
@@ -125,15 +146,16 @@ let cachedModels = [];
 
 // Get the actual API base URL based on provider
 function getApiBaseUrl() {
-  if (settings.apiProvider === "custom") {
-    return settings.customApiUrl || "https://api.anthropic.com";
-  }
-  return API_PROVIDERS[settings.apiProvider] || API_PROVIDERS.anthropic;
+  return resolveApiBaseUrl(settings.apiProvider, settings.customApiUrl);
 }
 
 // Update custom URL field visibility
 function updateCustomUrlVisibility() {
-  if (apiProviderSelect.value === "custom") {
+  if (isCustomProvider(apiProviderSelect.value)) {
+    customApiUrlInput.placeholder =
+      apiProviderSelect.value === "custom-openai"
+        ? "https://your-api-endpoint.com/v1"
+        : "https://your-api-endpoint.com";
     customUrlGroup.style.display = "block";
   } else {
     customUrlGroup.style.display = "none";
@@ -151,11 +173,7 @@ function updateZdrVisibility() {
 
 // Get temporary API base URL from form inputs (before saving)
 function getFormApiBaseUrl() {
-  const provider = apiProviderSelect.value;
-  if (provider === "custom") {
-    return customApiUrlInput.value.trim() || "https://api.anthropic.com";
-  }
-  return API_PROVIDERS[provider] || API_PROVIDERS.anthropic;
+  return resolveApiBaseUrl(apiProviderSelect.value, customApiUrlInput.value.trim());
 }
 
 // Fetch available models from API
@@ -251,8 +269,9 @@ async function loadSettings() {
       apiKeyInput.value = result.apiKey;
     }
     if (result.apiProvider) {
-      settings.apiProvider = result.apiProvider;
-      apiProviderSelect.value = result.apiProvider;
+      // Migrate legacy "custom" provider (Anthropic format)
+      settings.apiProvider = result.apiProvider === "custom" ? "custom-anthropic" : result.apiProvider;
+      apiProviderSelect.value = settings.apiProvider;
       updateCustomUrlVisibility();
       updateZdrVisibility();
     }

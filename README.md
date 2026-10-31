@@ -90,9 +90,9 @@ npm run package
 
 設定モーダルで以下の項目を設定できます：
 
-- **API Provider**: Anthropic / Z.AI / カスタム
-- **API Key**: Anthropic API Key
-- **Custom API URL**: カスタムプロバイダー使用時のエンドポイントURL
+- **API Provider**: Anthropic / OpenAI / OpenCode Go / Command Code / カスタム（Anthropic形式） / カスタム（OpenAI形式）
+- **API Key**: 選択したプロバイダーのAPI Key
+- **Custom API URL**: カスタムプロバイダー使用時のエンドポイントURL（Anthropic形式は `/v1` を含まないベースURL、OpenAI形式は `/v1` まで含むベースURL）
 - **Model**: 使用するモデル（API Keyを設定後「取得」ボタンで一覧を取得）
 - **System Prompt**: AIへのカスタム指示
 
